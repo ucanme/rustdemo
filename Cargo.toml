@@ -1,0 +1,11 @@
+[package]
+name = "project"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+diesel = "2.2.6"
+dotenvy = "0.15.7"
+mysql = "25.0.1"
+openssl = "0.10.68"

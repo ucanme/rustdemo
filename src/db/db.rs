@@ -1,23 +1,15 @@
+use sea_orm::{ConnectionTrait, EntityTrait};
+use sea_orm::DbBackend;
+use sea_orm::SqlxMySqlConnector;
+use sea_orm::{FromQueryResult, Statement as sea_statment,DatabaseConnection};
+use sqlx::MySqlPool;
 use std::env;
-use mysql::SslOpts;
-use openssl::ssl::{SslConnector, SslFiletype, SslMethod};
-fn get_conn_builder(
-    db_user: String,
-    db_password: String,
-    db_host: String,
-    db_port: u16,
-    db_name: String,
-) -> mysql::OptsBuilder {
-    let ssl_connector = SslConnector::builder(SslMethod::tls()).unwrap().set_ca_file("").unwrap();
-    mysql::OptsBuilder::new()
-        .ip_or_hostname(Some(db_host))
-        .tcp_port(db_port)
-        .db_name(Some(db_name))
-        .user(Some(db_user))
-        .pass(Some(db_password))
-}
+use model::post;
+use crate::model;
+use crate::model::post::Model;
 
-pub fn connect() -> mysql::error::Result<mysql::Pool> {
+pub async fn connect() -> DatabaseConnection{
+    println!("Connecting to database");
     let db_user = env::var("MYSQL_USER").expect("MYSQL_USER is not set in .env file");
     let db_password = env::var("MYSQL_PASSWORD").expect("MYSQL_PASSWORD is not set in .env file");
     let db_host = env::var("MYSQL_HOST").expect("MYSQL_HOST is not set in .env file");
@@ -25,7 +17,35 @@ pub fn connect() -> mysql::error::Result<mysql::Pool> {
     let db_name = env::var("MYSQL_DBNAME").expect("MYSQL_DBNAME is not set in .env file");
     let db_port = db_port.parse().unwrap();
 
-    let builder = get_conn_builder(db_user, db_password, db_host, db_port, db_name);
-    let pool = mysql::Pool::new(builder);
-    pool
+    let sqlx_opts = sqlx::mysql::MySqlConnectOptions::new()
+        .host(&db_host)
+        .port(db_port)
+        .database(&db_name)
+        .username(&db_user)
+        .password(&db_password)
+        .ssl_ca("./isrgrootx1.pem");
+
+    let pool = MySqlPool::connect_with(sqlx_opts).await.unwrap();
+    let db = SqlxMySqlConnector::from_sqlx_mysql_pool(pool);
+    let rs = db
+        .query_all(sea_statment::from_string(
+            db.get_database_backend(),
+            "select * from POST;".to_string(),
+        ))
+        .await;
+
+
+
+    let posts: Vec<post::Model> = post::Entity::find_by_id(1).all(&db).await.unwrap();
+
+    println!("表中的所有帖子:");
+    for post in posts {
+        println!("id: {}, title: {}", post.id, post.content);
+    }
+    // rs.unwrap().iter().for_each(|row| {
+    //     println!("Row: {:?}",row );
+    //     let content = row.try_get::<String>("","content");
+    //     println!("{:?}", content);
+    // });
+    db
 }

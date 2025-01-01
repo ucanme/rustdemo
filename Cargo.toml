@@ -5,7 +5,8 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
-diesel = "2.2.6"
 dotenvy = "0.15.7"
-mysql = "25.0.1"
-openssl = "0.10.68"
+mysql = "23.0.0"
+# SeaORM
+sqlx = "0.6.2"
+sea-orm = { version = "0.10.6", features = [ "sqlx-mysql", "runtime-async-std-native-tls", "macros" ] }

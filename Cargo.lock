@@ -2378,6 +2378,7 @@ dependencies = [
  "dotenvy",
  "mysql",
  "sea-orm",
+ "serde",
  "sqlx",
 ]
 

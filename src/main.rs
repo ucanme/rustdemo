@@ -21,7 +21,7 @@ async fn manual_hello() -> impl Responder {
 #[actix_web::main]
 async fn main() -> Result<(),CustomError> {
     dotenvy::dotenv().ok();
-    let sql_conn = connect().await;
+    let sql_conn = connect().await?;
     let db_data = web::Data::new(sql_conn);
     HttpServer::new( move ||{
         App::new()
@@ -31,6 +31,6 @@ async fn main() -> Result<(),CustomError> {
     })
         .bind(("127.0.0.1", 8080))?
         .run()
-        .await;
+        .await?;
     Ok(())
 }

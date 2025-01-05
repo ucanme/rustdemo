@@ -1,13 +1,15 @@
 mod router;
 mod db;
 mod model;
+mod error;
 
-use std::env;
+
 use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
-use mysql::Pool;
-use sea_orm::ConnectionTrait;
+// use sea_orm::ConnectionTrait;
 use crate::router::hello::hello;
 use db::db::{connect};
+use crate::error::error::CustomError;
+
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
@@ -17,11 +19,10 @@ async fn manual_hello() -> impl Responder {
     HttpResponse::Ok().body("Hey there!")
 }
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<(),CustomError> {
     dotenvy::dotenv().ok();
     let sql_conn = connect().await;
     let db_data = web::Data::new(sql_conn);
-    println!("Connected");
     HttpServer::new( move ||{
         App::new()
             .service(hello) .app_data(db_data.clone())
@@ -30,5 +31,6 @@ async fn main() -> std::io::Result<()> {
     })
         .bind(("127.0.0.1", 8080))?
         .run()
-        .await
+        .await;
+    Ok(())
 }

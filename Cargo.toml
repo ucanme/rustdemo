@@ -11,3 +11,4 @@ mysql = "23.0.0"
 sqlx = "0.6.2"
 sea-orm = { version = "0.10.6", features = [ "sqlx-mysql", "runtime-async-std-native-tls", "macros" ] }
 serde = "1.0.217"
+thiserror = "2.0.9"

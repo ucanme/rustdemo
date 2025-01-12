@@ -12,3 +12,6 @@ sqlx = "0.6.2"
 sea-orm = { version = "0.10.6", features = [ "sqlx-mysql", "runtime-async-std-native-tls", "macros" ] }
 serde = "1.0.217"
 thiserror = "2.0.9"
+futures = "0.3.31"
+tokio = { version = "1", features = ["full"] }
+tokio-macros = { version = "0.2.0-alpha.6" }

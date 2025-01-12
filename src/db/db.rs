@@ -1,5 +1,6 @@
 use sea_orm::SqlxMySqlConnector;
 use sea_orm::{DatabaseConnection};
+use std::sync::{Arc};
 use sqlx::MySqlPool;
 use std::env;
 use crate::error::error::CustomError;

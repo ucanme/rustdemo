@@ -8,5 +8,7 @@ pub enum CustomError {
     #[error(transparent)]
     FsIOError(#[from] std::io::Error),
     #[error(transparent)]
-    SqxCoreErr(#[from] sqlx::Error)
+    SqxCoreErr(#[from] sqlx::Error),
+    #[error(transparent)]
+    ParseIntError(#[from] std::num::ParseIntError),
 }

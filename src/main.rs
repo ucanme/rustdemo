@@ -4,6 +4,8 @@ mod model;
 mod error;
 mod background;
 mod case;
+mod lib;
+
 use background::*;
 use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
 // use sea_orm::ConnectionTrait;

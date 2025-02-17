@@ -2,10 +2,13 @@ use std::fmt::Debug;
 use std::io::read_to_string;
 use std::ptr::{null, null_mut};
 use actix_web::{get, web, HttpResponse, Result, Responder};
+use actix_web::http::StatusCode;
 use mysql::serde_json;
 use crate::model::post;
 use sea_orm::{EntityTrait};
 use serde::Serialize;
+use crate::lib::http;
+use crate::lib::http::ApiResponse;
 
 #[derive(Serialize)]
 struct Resp{
@@ -24,19 +27,15 @@ struct RespMsg{
 }
 
 #[get("/")]
-pub async fn hello(db:web::Data<sea_orm::DatabaseConnection>) ->HttpResponse {
+pub async fn hello(db:web::Data<sea_orm::DatabaseConnection>) -> impl Responder {
     let result = post::Entity::find_by_id(1).all(db.get_ref()).await;
     match result {
         Ok(posts) => {
-            // let str = serde_json::to_string(&posts).unwrap();
-            HttpResponse::Ok().json(posts)
+            http::build_error_response(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong")
+
         }
         Err(D    ) =>{
-            let msg =  RespMsg{
-                code:1000,
-                message: "123".to_string(),
-            };
-            HttpResponse::Ok().json(msg)
+            http::build_error_response(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,"Not found!")
         }
     }
 }

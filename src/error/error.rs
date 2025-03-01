@@ -11,4 +11,6 @@ pub enum CustomError {
     SqxCoreErr(#[from] sqlx::Error),
     #[error(transparent)]
     ParseIntError(#[from] std::num::ParseIntError),
+    #[error(transparent)]
+    SeaOrmDbError(#[from] sea_orm::DbErr),
 }

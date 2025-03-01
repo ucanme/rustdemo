@@ -5,13 +5,16 @@ mod error;
 mod background;
 mod case;
 mod lib;
-
+use std::time::{Duration, Instant};
 use background::*;
 use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
 // use sea_orm::ConnectionTrait;
 use crate::router::hello::hello;
 use db::db::{connect};
 use crate::error::error::CustomError;
+use crate::lib::middleware;
+use actix_web::dev::Service;
+
 
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
@@ -34,12 +37,29 @@ async fn main() -> Result<(),CustomError> {
         task.run().await;
     });
     let server = HttpServer::new( move ||{
-        App::new()
+        App::new().wrap_fn(|req, srv| {
+            println!("{}", "2. Pre-process the Request");
+            let start_time = Instant::now();
+            let path = req.path().to_owned();
+            let fut = srv.call(req);
+            async move {
+                let res = fut.await;
+                let elapsed_time = start_time.elapsed();
+                println!("{}", "3. Post-process a Response");
+                println!(
+                    "Request to {} took {:?}",
+                    path,
+                    elapsed_time
+                );
+                res
+            }
+        })
+            .wrap(middleware::Timed)
+
             .service(hello) .app_data(db_data.clone())
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
-    })
-        .bind(("127.0.0.1", 8080))?
+    }).bind(("127.0.0.1", 8080))?
         .run();
 
    server.await?;
